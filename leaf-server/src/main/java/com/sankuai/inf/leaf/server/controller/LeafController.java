@@ -22,6 +22,13 @@ public class LeafController {
     @Autowired
     private SnowflakeService snowflakeService;
 
+    /**
+     * 双buffer优化方案API
+     * 根据key【业务标识(biz_tag)】来生成分布式ID
+     *
+     * @param key
+     * @return 新的ID
+     */
     @RequestMapping(value = "/api/segment/get/{key}")
     public String getSegmentId(@PathVariable("key") String key) {
         return get(key, segmentService.getId(key));

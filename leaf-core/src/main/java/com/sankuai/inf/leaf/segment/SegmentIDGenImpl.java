@@ -59,12 +59,31 @@ public class SegmentIDGenImpl implements IDGen {
         }
     }
 
+    /**
+     * SegmentIDGenImpl初始化到Spring容器时会被调用
+     *
+     * @return
+     */
     @Override
     public boolean init() {
         logger.info("Init ...");
         // 确保加载到kv后才初始化成功
+        /**
+         * 把DB中的biz_tag【key】、max_id、step
+         * 初始化到jvm中的 Map<String, SegmentBuffer> cache 中
+         */
         updateCacheFromDb();
+        /**
+         * 更新标识initOK
+         * 说明：
+         * 使用volatile解决变量initOK对多线程的可见性问题
+         * private volatile boolean initOK = false;
+         */
         initOK = true;
+        /**
+         * 把DB中新insert的biz_tag【key】、max_id、step
+         * 加入到Map<String, SegmentBuffer> cache
+         */
         updateCacheFromDbAtEveryMinute();
         return initOK;
     }
@@ -431,7 +450,7 @@ public class SegmentIDGenImpl implements IDGen {
     }
 
     /**
-     * 等待号段更新线程更新完成
+     * 自旋等待号段更新线程更新完成
      * 最多等待100s
      *
      * @param buffer
